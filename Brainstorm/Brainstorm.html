@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+        }
+        .button-clicked {
+            background-color: white;
+            color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Brainstorming Website</h2>
+
+<label for="topic">Enter a topic:</label><br>
+<input type="text" id="topic" name="topic"><br><br>
+<button onclick="generateButton()">Generate Button</button>
+
+<div id="buttons"></div>
+
+<script>
+    function generateButton() {
+        let topic = document.getElementById("topic").value;
+        let button = document.createElement("button");
+        button.innerHTML = topic;
+        button.className = "button";
+        button.onclick = function() { generateRelatedButtons(this); };
+        document.getElementById("buttons").appendChild(button);
+    }
+
+    async function generateRelatedButtons(button) {
+        button.classList.add("button-clicked");
+        let relatedTopics = await getRelatedTopics(button.innerHTML);
+        let row = document.createElement("div");
+        for (let i = 0; i < relatedTopics.length; i++) {
+            let newButton = document.createElement("button");
+            newButton.innerHTML = relatedTopics[i];
+            newButton.className = "button";
+            newButton.onclick = function() { generateRelatedButtons(this); };
+            row.appendChild(newButton);
+        }
+        document.getElementById("buttons").appendChild(row);
+    }
+
+    async function getRelatedTopics(topic) {
+        // This function should return an array of 5 related topics or objects
+        // You can implement this using the ChatGPT API with the gpt-3.5-turbo model
+        let response = await fetch("<URL>", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer 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"
+            },
+            body: JSON.stringify({
+                model: "gpt-3.5-turbo",
+                prompt: `Give me 5 related topics or objects to ${topic}`,
+                max_tokens: 100,
+                n: 1,
+                stop: null
+            })
+        });
+        let data = await response.json();
+        let text = data.choices[0].text.trim();
+        let relatedTopics = text.split("\n");
+        return relatedTopics;
+    }
+</script>
+
+</body>
+</html>
